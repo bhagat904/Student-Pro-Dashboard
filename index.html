@@ -1,0 +1,285 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6558e8">
+    <title>StudentHub Pro | Dashboard</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="layout">
+        <aside class="sidebar">
+            <a href="{{ url_for('home') }}" class="brand">
+                <span class="brand-logo">S</span>
+                <span>StudentHub PAWAN<small>PRO MANAGEMENT</small></span>
+            </a>
+
+            <p class="menu-label">MAIN MENU</p>
+            <a class="nav active" href="{{ url_for('home') }}">▦ Dashboard</a>
+            <a class="nav" href="#add-student">＋ Add Student</a>
+            <a class="nav" href="#student-records">☷ Student Records</a>
+
+            <div class="sidebar-note">
+                <div class="note-icon">✦</div>
+                <strong>Stay organized</strong>
+                <p>Manage student information, courses and fees in one place.</p>
+            </div>
+
+            <div class="admin">
+                <div class="admin-avatar">SH</div>
+                <div><strong>StudentHub Admin</strong><small>Administrator</small></div>
+            </div>
+        </aside>
+
+        <section class="workspace">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">YOUR WORKSPACE</p>
+                    <h1>Dashboard <span class="accent">.</span></h1>
+                    <p class="muted">Welcome back! Here is your student overview.</p>
+                </div>
+                <a class="button primary" href="#add-student">＋ New Student</a>
+            </header>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="alerts">
+                        {% for category, message in messages %}
+                            <div class="alert {{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <section class="hero">
+                <div class="hero-content">
+                    <span class="hero-label">STUDENT MANAGEMENT SYSTEM</span>
+                    <h2>Everything in<br>one place.</h2>
+                    <p>Organize student details and manage your records with ease.</p>
+                    <a class="hero-button" href="#student-records">Explore records →</a>
+                </div>
+                <div class="hero-art" aria-hidden="true">
+                    <div class="art-orbit"></div>
+                    <div class="art-card">
+                        <div class="art-avatar">♟</div>
+                        <div class="art-lines"><i></i><i></i><i></i></div>
+                        <span class="art-check">✓</span>
+                    </div>
+                    <span class="sparkle sparkle-one">✦</span>
+                    <span class="sparkle sparkle-two">✧</span>
+                </div>
+            </section>
+
+            <section class="stats">
+                <article class="stat-card">
+                    <div class="stat-head">Total Students <span class="icon purple">♟</span></div>
+                    <div class="stat-number">{{ total }}</div>
+                    <p>Registered student records</p>
+                </article>
+                <article class="stat-card">
+                    <div class="stat-head">Payments Received <span class="icon green">✓</span></div>
+                    <div class="stat-number">{{ paid }}</div>
+                    <p>Students marked as paid</p>
+                </article>
+                <article class="stat-card">
+                    <div class="stat-head">Payments Pending <span class="icon orange">◷</span></div>
+                    <div class="stat-number">{{ pending }}</div>
+                    <p>Awaiting payment</p>
+                </article>
+                <article class="stat-card">
+                    <div class="stat-head">Total Course Fees <span class="icon blue">₹</span></div>
+                    <div class="stat-number money">₹{{ "%.2f"|format(total_fees or 0) }}</div>
+                    <p>₹{{ "%.2f"|format(paid_fees or 0) }} marked paid</p>
+                </article>
+            </section>
+
+            <section class="panel" id="add-student">
+                <div class="panel-heading">
+                    <div class="heading-icon purple">＋</div>
+                    <div class="heading-text">
+                        <h2>Register a Student</h2>
+                        <p>Add new student information to your database.</p>
+                    </div>
+                </div>
+
+                <form action="{{ url_for('add_student') }}" method="POST">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="name">Full Name *</label>
+                            <input id="name" name="name" type="text"
+                                   maxlength="120" placeholder="Enter full name" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="course">Course Name *</label>
+                            <input id="course" name="course" type="text"
+                                   maxlength="120" placeholder="e.g. BCA, Python" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="phone">WhatsApp / Phone Number</label>
+                            <input id="phone" name="phone" type="tel"
+                                   maxlength="30" placeholder="+91 98765 43210">
+                            <small>Include the country code for WhatsApp.</small>
+                        </div>
+
+                        <div class="field">
+                            <label for="email">Email Address</label>
+                            <input id="email" name="email" type="email"
+                                   maxlength="254" placeholder="student@example.com">
+                        </div>
+
+                        <div class="field">
+                            <label for="fee_amount">Course Fee (₹)</label>
+                            <input id="fee_amount" name="fee_amount" type="number"
+                                   min="0" max="1000000000" step="0.01" value="0" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="payment_status">Payment Status</label>
+                            <select id="payment_status" name="payment_status">
+                                <option value="Pending">Pending</option>
+                                <option value="Paid">Paid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-bottom">
+                        <span class="form-hint">✓ Records are saved in your local SQLite database.</span>
+                        <button class="button primary" type="submit">Save Student →</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="panel" id="student-records">
+                <div class="records-header">
+                    <div>
+                        <h2>Student Directory</h2>
+                        <p>Search, contact and manage student records.</p>
+                    </div>
+
+                    <form class="search-form" action="{{ url_for('home') }}" method="GET">
+                        <input type="search" name="search" value="{{ search }}"
+                               placeholder="Search students...">
+                        <button type="submit">Search</button>
+                        {% if search %}
+                            <a href="{{ url_for('home') }}" class="clear-link">Clear</a>
+                        {% endif %}
+                    </form>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>STUDENT</th>
+                                <th>COURSE</th>
+                                <th>CONTACT</th>
+                                <th>COURSE FEE</th>
+                                <th>PAYMENT</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td>
+                                    <div class="student-info">
+                                        <div class="student-avatar">
+                                            {{ (student['name'] or '?')[0]|upper }}
+                                        </div>
+                                        <div>
+                                            <strong>{{ student['name'] or 'Unnamed' }}</strong>
+                                            <small>ID #{{ student['id'] }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="course-chip">
+                                        {{ student['course'] or 'Not specified' }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if student['phone'] %}
+                                        <div>{{ student['phone'] }}</div>
+                                        {% set wa_number = student['phone']|digits %}
+                                        {% if wa_number %}
+                                            <a class="whatsapp-link"
+                                               href="https://wa.me/{{ wa_number }}"
+                                               target="_blank"
+                                               rel="noopener noreferrer">
+                                                WhatsApp ↗
+                                            </a>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="muted">No phone number</span>
+                                    {% endif %}
+                                    {% if student['email'] %}
+                                        <small class="email">{{ student['email'] }}</small>
+                                    {% endif %}
+                                </td>
+
+                                <td class="fee">
+                                    ₹{{ "%.2f"|format(student['fee_amount'] or 0) }}
+                                </td>
+
+                                <td>
+                                    {% if student['payment_status'] == 'Paid' %}
+                                        <span class="badge paid">● Paid</span>
+                                    {% else %}
+                                        <span class="badge pending">● Pending</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <form action="{{ url_for('delete_student', student_id=student['id']) }}"
+                                          method="POST"
+                                          onsubmit="return confirm('Delete this student record? This cannot be undone.');">
+                                        <button type="submit" class="delete-button">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <div class="empty-icon">☷</div>
+                                        <h3>
+                                            {% if search %}No matching students{% else %}No students yet{% endif %}
+                                        </h3>
+                                        <p>
+                                            {% if search %}
+                                                Try a different search term.
+                                            {% else %}
+                                                Add your first student using the form above.
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">
+                    <span>Showing <strong>{{ students|length }}</strong> record(s)</span>
+                    <span>Saved locally in SQLite</span>
+                </div>
+            </section>
+
+            <footer class="footer">
+                <strong>✦ StudentHub Pro</strong>
+                <span>Student management made simpler · 2026</span>
+            </footer>
+        </section>
+    </main>
+</body>
+</html>
